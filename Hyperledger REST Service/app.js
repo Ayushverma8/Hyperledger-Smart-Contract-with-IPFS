@@ -121,11 +121,11 @@ client.files
         console.log(signature_seller.toString("base64"));
         console.log(signature_buyer.toString("base64"));
         // Creating the smart contract for Buyer and the Seller
-        await createAsset("Seller1", signature_seller.toString("base64"));
-        await createAsset("Buyer1", signature_buyer.toString("base64"));
+        await createAsset_024("Seller1", signature_seller.toString("base64"));
+        await createAsset_024("Buyer1", signature_buyer.toString("base64"));
         // Reading the assets from the smart contract
-        let buyer_digest_from_hyperledger = await readAsset("Buyer1");
-        let seller_digest_from_hyperledger = await readAsset("Seller1");
+        let buyer_digest_from_hyperledger = await readAsset_024("Buyer1");
+        let seller_digest_from_hyperledger = await readAsset_024("Seller1");
         // Checking using the Buyer public key for the sha265
         const isVerified = crypto.verify(
           "sha256",
@@ -244,11 +244,11 @@ async function getActorConnection() {
   return networkConnections["hyperledger-ipfs"];
 }
 
-async function createAsset(subject, value) {
+async function createAsset_024(subject, value) {
   let contract = await getActorConnection();
   let result = "";
   try {
-    await contract.submitTransaction("writeSignature", subject, value);
+    await contract.submitTransaction("writeSignature_024", subject, value);
     result = "asset " + subject + " was successfully created!";
     console.log(result);
   } catch (e) {
@@ -261,14 +261,14 @@ async function createAsset(subject, value) {
 
 // checkApproval
 
-async function readAsset(subject) {
+async function readAsset_024(subject) {
   console.log(
-    '\n--> Evaluate Transaction: ReadAsset, function returns "asset1" attributes'
+    '\n--> Evaluate Transaction: readAsset_024, function returns "asset1" attributes'
   );
   let contract = await getActorConnection();
   let result = "";
   try {
-    result = await contract.evaluateTransaction("readSignature", subject);
+    result = await contract.evaluateTransaction("readSignature_024", subject);
   } catch (e) {
     console.log(e);
     result = e.message;
@@ -291,7 +291,7 @@ const requestListener = async function (req, res) {
 
   if (req.url.startsWith("/read")) {
     subject = queryObject.subject;
-    result = await readAsset(subject);
+    result = await readAsset_024(subject);
     res.writeHead(200);
     res.end(result);
   } else if (req.url.startsWith("/update")) {
@@ -303,7 +303,7 @@ const requestListener = async function (req, res) {
   } else if (req.url.startsWith("/create")) {
     value = queryObject.value;
     subject = queryObject.subject;
-    result = await createAsset(subject, value);
+    result = await createAsset_024(subject, value);
     res.writeHead(200);
     res.end(result);
   } else if (req.url.startsWith("/check-approval")) {
