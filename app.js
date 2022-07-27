@@ -50,6 +50,8 @@ let networkConnections = {};
 let gateway = null;
 let network = null;
 let contract = null;
+
+// Defining the key options here
 const keyOptions = [
   {
     modulusLength: 4096,
@@ -75,6 +77,7 @@ const keyOptions = [
   },
 ];
 
+// Deconstructing the Public and Private key pairs
 const [
   { publicKey: publicKeyBuyer, privateKey: privateKeyBuyer },
   { publicKey: publicKeySeller, privateKey: privateKeySeller },
@@ -82,6 +85,7 @@ const [
 // Setup done for the public an private key
 console.log(publicKeyBuyer);
 var MFS_path = "/hyperledger-ipfs";
+// Message that should be used to go through the message
 client.files
   .write(
     MFS_path,
@@ -91,6 +95,7 @@ client.files
     { create: true }
   )
   .then(async (r) => {
+    // Setting the IPFS client.
     client.files.stat(MFS_path, { hash: true }).then(async (r) => {
       let ipfsAddr = r.cid.toString();
       console.log("added file ipfs:", ipfsAddr);
@@ -102,23 +107,26 @@ client.files
         const raw = Buffer.from(content).toString("utf8");
         // console.log(JSON.parse(raw))
         console.log(raw);
+        // Defining the Signature buyer for Digital Certificate
         const signature_buyer = crypto.sign("sha256", Buffer.from(raw), {
           key: privateKeyBuyer,
           padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
         });
+        // Signature of the seller for Digital Certificate
         const signature_seller = crypto.sign("sha256", Buffer.from(raw), {
           key: privateKeySeller,
           padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
         });
-        // console.log(signature_seller.toString("base64"));
-        // console.log(signature_buyer.toString("base64"));
 
+        console.log(signature_seller.toString("base64"));
+        console.log(signature_buyer.toString("base64"));
+        // Creating the smart contract for Buyer and the Seller
         await createAsset("Seller1", signature_seller.toString("base64"));
         await createAsset("Buyer1", signature_buyer.toString("base64"));
-
+        // Reading the assets from the smart contract
         let buyer_digest_from_hyperledger = await readAsset("Buyer1");
         let seller_digest_from_hyperledger = await readAsset("Seller1");
-
+        // Checking using the Buyer public key for the sha265
         const isVerified = crypto.verify(
           "sha256",
           raw,
@@ -133,9 +141,9 @@ client.files
         console.log(
           "Verifing signature from the IPFS file and matching it with the smart contract returned signature for the Buyer"
         );
-        console.log("signature verified status : ", isVerified);
+        console.log("signature verified status for buyer : ", isVerified);
 
-        // Verifying the seller
+        // Verifying the Digital Signature for Seller to check authneticity
         const signature = crypto.sign("sha256", Buffer.from(raw), {
           key: privateKeySeller,
           padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
@@ -157,7 +165,7 @@ client.files
         );
 
         // isVerified should be `true` if the signature is valid
-        console.log("signature verified: ", isVerified_);
+        console.log("signature verified for seller: ", isVerified_);
         // console.log(content.toString());
       }
 
